@@ -1,5 +1,7 @@
 import requests
+import uuid
 from bs4 import BeautifulSoup
+
 
 category = input("Which category are you interested: ")
 url = f"https://wallhaven.cc/search?q={category}"
@@ -15,6 +17,7 @@ soup2 = BeautifulSoup(r2.content, "html.parser")
 img_tag = soup2.find(id="wallpaper")
 alt = img_tag["alt"]
 src = img_tag["src"]
+random_id = str(uuid.uuid4()).rsplit("-")[-1]
 
 # Download image
 wallpaper = requests.get(src)
