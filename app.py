@@ -1,7 +1,9 @@
+import os
 import random
 import requests
 import uuid
 from bs4 import BeautifulSoup
+
 
 while True:
     category = input("Which category are you interested: ")
@@ -42,4 +44,9 @@ while True:
         wallpaper = requests.get(src)
         if "+" in category:
             category = category.replace("+", "-")
+
+        if not "Wallpapers" in os.listdir():
+            os.mkdir("Wallpapers")
+
         open(f"{category}.jpg", "wb").write(wallpaper.content)
+        os.rename(f"{category}.jpg", f"Wallpapers/{category}-{random_id}.jpg")
