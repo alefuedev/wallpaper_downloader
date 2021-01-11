@@ -5,7 +5,15 @@ from bs4 import BeautifulSoup
 
 while True:
     category = input("Which category are you interested: ")
-    url = f"https://wallhaven.cc/search?q={category}"
+    words_in_category = category.casefold().rsplit(" ")
+    url = ""
+    if len(words_in_category) == 1:
+        url = f"https://wallhaven.cc/search?q={category}"
+    else:
+        category_no_spaces = category.strip()
+        category = category_no_spaces.replace(" ", "+")
+        url = f"https://wallhaven.cc/search?q={category}"
+
     r = requests.get(url)
     soup = BeautifulSoup(r.content, "html.parser")
     notice = str(soup.find("p", "pagination-notice")).rsplit(" ")
@@ -32,4 +40,6 @@ while True:
 
         # Download image
         wallpaper = requests.get(src)
+        if "+" in category:
+            category = category.replace("+", "-")
         open(f"{category}.jpg", "wb").write(wallpaper.content)
