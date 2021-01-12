@@ -1,12 +1,19 @@
+import colorama
 import os
 import random
 import requests
 import uuid
 from bs4 import BeautifulSoup
 
+colorama.init()
+
 
 while True:
-    category = input("Which category are you interested: ")
+    category = input(
+        "Which category are you interested [to exit the program type quit]: "
+    )
+    if category == "quit":
+        break
     words_in_category = category.casefold().rsplit(" ")
     url = ""
     if len(words_in_category) == 1:
@@ -16,8 +23,8 @@ while True:
         category = category_no_spaces.replace(" ", "+")
         url = f"https://wallhaven.cc/search?q={category}"
 
-    r = requests.get(url)
-    soup = BeautifulSoup(r.content, "html.parser")
+    request = requests.get(url)
+    soup = BeautifulSoup(request.content, "html.parser")
     notice = str(soup.find("p", "pagination-notice")).rsplit(" ")
     category_found = True
 
@@ -26,22 +33,20 @@ while True:
             category_found = False
             print("Category not found.")
 
-    if category_found == True:
+    if category_found:
         links = soup.find_all("a", "preview")
         links_length = len(links) - 1
         random_link = random.randint(0, links_length)
-        first_link = links[random_link]
-        wallpaper_location = first_link["href"]
+        link = links[random_link]
 
-        r2 = requests.get(wallpaper_location)
-        soup2 = BeautifulSoup(r2.content, "html.parser")
+        second_request = requests.get(link["href"])
+        soup2 = BeautifulSoup(second_request.content, "html.parser")
         img_tag = soup2.find(id="wallpaper")
-        alt = img_tag["alt"]
-        src = img_tag["src"]
-        random_id = str(uuid.uuid4()).rsplit("-")[-1]
+        wallpaper_src = img_tag["src"]
 
         # Download image
-        wallpaper = requests.get(src)
+
+        wallpaper = requests.get(wallpaper_src)
         if "+" in category:
             category = category.replace("+", "-")
 
@@ -49,4 +54,10 @@ while True:
             os.mkdir("Wallpapers")
 
         open(f"{category}.jpg", "wb").write(wallpaper.content)
+        random_id = str(uuid.uuid4()).rsplit("-")[-1]
         os.rename(f"{category}.jpg", f"Wallpapers/{category}-{random_id}.jpg")
+        print(
+            colorama.Back.MAGENTA,
+            (f"{category}-{random_id}.jpg save in the Wallpapers folder."),
+            colorama.Style.RESET_ALL,
+        )
